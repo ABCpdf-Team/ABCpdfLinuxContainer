@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APCpdfLinuxContainer", "APCpdfLinuxContainer\APCpdfLinuxContainer.csproj", "{F812AE52-7B5D-40DD-B086-DAC4DBE6083B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F812AE52-7B5D-40DD-B086-DAC4DBE6083B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F812AE52-7B5D-40DD-B086-DAC4DBE6083B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F812AE52-7B5D-40DD-B086-DAC4DBE6083B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F812AE52-7B5D-40DD-B086-DAC4DBE6083B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C59BD9E2-0550-4DCF-895A-04F323215463}
+	EndGlobalSection
+EndGlobal
