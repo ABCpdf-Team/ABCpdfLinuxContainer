@@ -59,7 +59,7 @@ This should load up a PDF in the browser as follows:
 
 ### Language Support
 
-Out of the box the Docker image we use has support for a number of language character sets. You may test this with the application using the following Ukrainian, Arabic and Hebrew language examples:
+The abcpdf Docker image used have support for a number of language character sets. You may test this with the application using the following Ukrainian, Arabic and Hebrew language examples:
 
 ```html
 Here are some examples you could use to highlight the use of different languages and even emojis using the default abcpdf repository image:
@@ -68,9 +68,28 @@ Here are some examples you could use to highlight the use of different languages
 <p><strong>שלום</strong> <em>עולם</em></p>
 ```
 
-### Installing Additional Languages
+## Installing Additional Languages
 
-For other languages you will need to install additional language pack resources in the Dockerfile. So for Japanese, Chinese and Korean you would need to add the following commands to the runtime Dockerfile:
+### Noto Fonts
+
+For other languages you will need to install additional fonts and/or language pack resources in the Dockerfile.
+
+A good balance for CJK languages is to simply add the installation of the [Google's Noto fonts](https://fonts.google.com/noto) CJK package to the Dockerfile:
+
+```Dockerfile
+FROM abcpdf/ubuntu-22.04-aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+RUN apt-get update && apt-get install -y fonts-noto-cjk
+RUN fc-cache -f -v
+```
+
+There are [additional Noto languages packages here](https://packages.debian.org/sid/fonts-noto).
+
+### Language Pack Installation
+
+Alternatively you may install the relevant language packs using following commands to the runtime Dockerfile:
 
 ```Dockerfile
 FROM abcpdf/ubuntu-22.04-aspnet:8.0 AS base
