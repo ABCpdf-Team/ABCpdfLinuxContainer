@@ -70,7 +70,7 @@ Here are some examples you could use to highlight the use of different languages
 
 ### Installing Additional Languages
 
-For other languages you may need to install additional language pack resources in the Dockerfile. So for Japanese, Chinese and Korean you would need to add the following commands to the runtime Dockerfile:
+For other languages you will need to install additional language pack resources in the Dockerfile. So for Japanese, Chinese and Korean you would need to add the following commands to the runtime Dockerfile:
 
 ```Dockerfile
 FROM abcpdf/ubuntu-22.04-aspnet:8.0 AS base
