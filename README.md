@@ -62,7 +62,6 @@ This should load up a PDF in the browser as follows:
 The abcpdf Docker image used have support for a number of language character sets. You may test this with the application using the following Ukrainian, Arabic and Hebrew language examples:
 
 ```html
-Here are some examples you could use to highlight the use of different languages and even emojis using the default abcpdf repository image:
 <p><strong>Привіт</strong> <em>Світ</em></p>
 <p><strong>مرحبا</strong> <em>بالعالم</em></p>
 <p><strong>שלום</strong> <em>עולם</em></p>
