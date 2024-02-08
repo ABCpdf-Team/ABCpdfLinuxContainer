@@ -13,7 +13,7 @@ This project was initially generated using the ASP.NET Core Web API template usi
 
 ### Running the Application
 
-Clone the APCpdfLinuxContainer repository and open the solution in Visual Studio 2022.
+Clone the ABCpdfLinuxContainer repository and open the solution in Visual Studio 2022.
 
 Select Docker from the Debugging toolbar dropdown if it isn't already selected. You may be prompted to start Docker Desktop which you should do - it has to be running to run the project in a container.
 
