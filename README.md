@@ -122,6 +122,6 @@ The Dockerfile we use in this project makes use of the 'app' USER as specified i
 
 Due to ABCpdf.NET and ABCChrome requiring linux-native components it is problematic to provide a chiseled Ubuntu 22.04 image. However you may be able to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler. More inforamtion can be found in the repos readme.
 
-### Further Reading
+## Further Reading
 
 Please refer to [the latest ABCpdf linux documentation](https://www.websupergoo.com/helppdfnet/default.htm?page=source%2f2-getting_started%2f6-platforms.htm) for further information.
