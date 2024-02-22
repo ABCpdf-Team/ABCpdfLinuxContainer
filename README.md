@@ -114,6 +114,10 @@ The Dockerfiles used to create the Docker Hub Docker images are [available here]
 
 ## Container Security Considerations
 
+### Base Image
+
+Due to it's frequent security update cycle we recommend that you use images based on the latest Ubuntu LTS version. We also recommend that you use the latest LTS version of .NET.
+
 ### Non-root user
 
 The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is available in the deployed production container deployed container.
