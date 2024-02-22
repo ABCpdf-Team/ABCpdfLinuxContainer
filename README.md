@@ -122,9 +122,11 @@ Due to it's frequent security update cycle we recommend that you use images base
 
 The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is available in the deployed production container deployed container.
 
-### Reducing Attack Surface
+### Reducing Container Attack Surface
 
-Due to ABCpdf.NET and ABCChrome requiring linux-native components it is problematic to provide a chiseled Ubuntu 22.04 image. However you may be able to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler. More inforamtion can be found in the repos readme.
+Due to ABCpdf.NET and ABCChrome requiring linux-native components it is currently problematic to provide a [chiseled Ubuntu](https://github.com/canonical/chisel) image due to the few number of [libraries that have so far been sliced](https://github.com/canonical/chisel-releases/tree/ubuntu-22.04/slices). This however improving all the time but you may well have to customize your chiseled image.
+
+A better solution may be to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler. More information can be found in the slimtoolkit repo's readme.
 
 ## Further Reading
 
