@@ -1,4 +1,5 @@
-FROM abcpdf/ubuntu-22.04-aspnet:8.0 AS base
+FROM abcpdf/mcr-aspnet:8.0-jammy AS base
+USER app
 WORKDIR /app
 EXPOSE 8080
 
@@ -13,7 +14,9 @@ RUN dotnet build "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64 --self-contained false
+RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64 --self-contained true
+# This is requried to ensure ABCChrome can be launched by user "app" in production
+RUN chmod o+x /app/publish/ABCChrome117/ABCChrome117
 
 ######################################################################################################################################
 # In debug mode the /app folder points to the project folder even if we try to copy the artefacts from the publshing stage into it. 
