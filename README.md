@@ -1,6 +1,6 @@
 # ABCpdf in a Linux Container
 
-Linux has been supported since version 13 of ABCpdf. Here is an example project to show how to run ABCpdf as a containerized microservice using a Docker image based on Ubuntu 22.04 LTS. This allows in-container debugging in Visual Studio 2022 and later. You may use this as a template for your own ABCpdf-powered microservice.
+Linux has been supported since version 13 of ABCpdf. Here is an example project to show how to run ABCpdf as a containerized microservice using a Docker image based on the official Microsoft ASP.NET Core (in turn based on Ubuntu 22.04 LTS). This allows in-container debugging in Visual Studio 2022 and later. You may use this as a template for your own ABCpdf-powered microservice.
 
 This project was initially generated using the ASP.NET Core Web API template using Visual Studio 2022 with the default options of Docker and OpenAPI support enabled. It uses the minimal API model to expose a test endpoint.
 
@@ -108,9 +108,19 @@ Other languages may be similarly installed. See [the Ubuntu packages site](https
 
 ## ABCpdf Runtime Docker Images
 
-The .NET 8.0 runtime image used in this project is [abcpdf/ubuntu-22.04-aspnet:8.0](https://hub.docker.com/repository/docker/abcpdf/ubuntu-22.04-aspnet/general) which is based on Ubuntu 22.04 LTS. This image includes the requisite libraries required by the linux-native components of ABCpdf as well as a basic set of fonts.
+The .NET 8.0 runtime image used in this project is [abcpdf/mcr-aspnet:8.0](https://hub.docker.com/repository/docker/abcpdf/mcr-aspnet/general) which is based on the [official Microsoft ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet/) but also includes the requisite libraries required by the linux-native components of ABCpdf as well as a basic set of fonts.
 
-The Dockerfiles used to create the Docker Hub Docker images are [available here](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/tree/main/Runtimes/Ubuntu/22.04). You may use these to roll-your-own image.
+The Dockerfiles used to create the Docker Hub Docker images are [available here](https://hub.docker.com/repositories/abcpdf). You may use these to roll-your-own image.
+
+## Container Security Considerations
+
+### Non-root user
+
+The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is available in the deployed production container deployed container.
+
+### Reducing Attack Surface
+
+Due to ABCpdf.NET and ABCChrome requiring linux-native components it is problematic to provide a chiseled Ubuntu 22.04 image. However you may be able to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler. More inforamtion can be found in the repos readme.
 
 ### Further Reading
 
