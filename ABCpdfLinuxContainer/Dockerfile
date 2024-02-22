@@ -14,7 +14,7 @@ RUN dotnet build "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64 --self-contained true
+RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64
 # This is requried to ensure ABCChrome can be launched by user "app" in production
 RUN chmod o+x /app/publish/ABCChrome117/ABCChrome117
 
