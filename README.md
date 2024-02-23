@@ -102,7 +102,7 @@ RUN apt-get install -y language-pack-zh* chinese*
 RUN apt-get install -y language-pack-ko install korean*
 ```
 
-Other languages may be similarly installed. See [the Ubuntu packages site](https://packages.ubuntu.com/search?keywords=language-pack) to find your desired language pack.
+Other languages may be similarly installed. See [the Ubuntu language pack pages](https://packages.ubuntu.com/search?keywords=language-pack) to find your desired language pack.
 
 ## ABCpdf Runtime Docker Images
 
@@ -116,13 +116,15 @@ The Dockerfiles used to create the Docker Hub Docker images are [available here]
 
 Due to it's frequent security update cycle we recommend that you use images based on the latest Ubuntu LTS version. We also recommend that you use the latest LTS version of .NET.
 
+we also suggest that add an `RUN apt-get upgrade -y` step in the runtime phase of your own Dockerfile.
+
 ### Non-root user
 
-The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is unavailable in the deployed container in productio.
+The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is unavailable in the deployed container in production.
 
 ### Reducing Container Attack Surface
 
-Due to ABCpdf.NET and ABCChrome requiring linux-native components it is currently problematic to provide a [chiseled Ubuntu](https://github.com/canonical/chisel) image due to the limited number of [libraries that have so far been sliced](https://github.com/canonical/chisel-releases/tree/ubuntu-22.04/slices). This is however improving all the time but you may well have to add your own library slices to create your chiseled image.
+Due to ABCpdf.NET and ABCChrome requiring linux-native components it is currently problematic to provide a [chiseled Ubuntu](https://github.com/canonical/chisel) image due to the limited number of [libraries that have so far been sliced](https://github.com/canonical/chisel-releases/tree/ubuntu-22.04/slices). This is however improving all the time but until then you will have to create your own library slices to create your chiseled image.
 
 A better solution may be to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler to pick up all of ABCpdf dependencies. More information can be found in the slimtoolkit repo's readme.
 
