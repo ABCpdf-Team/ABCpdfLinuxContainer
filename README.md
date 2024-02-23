@@ -76,10 +76,9 @@ For other languages you will need to install additional fonts and/or language pa
 A good balance for CJK languages is to simply add the installation of the [Google's Noto fonts](https://fonts.google.com/noto) CJK package to the Dockerfile:
 
 ```Dockerfile
-FROM abcpdf/ubuntu-22.04-aspnet:8.0 AS base
+FROM abcpdf/mcr-aspnet:8.0-jammy AS base
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
 RUN apt-get update && apt-get install -y fonts-noto-cjk
 RUN fc-cache -f -v
 ```
@@ -91,10 +90,9 @@ There are [additional Noto languages packages here](https://packages.debian.org/
 Alternatively you may install the relevant language packs using following commands to the runtime Dockerfile:
 
 ```Dockerfile
-FROM abcpdf/ubuntu-22.04-aspnet:8.0 AS base
+FROM abcpdf/mcr-aspnet:8.0-jammy AS base
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
 RUN apt-get update
 # Japanese
 RUN apt-get install -y language-pack-ja install japan*
@@ -108,7 +106,7 @@ Other languages may be similarly installed. See [the Ubuntu packages site](https
 
 ## ABCpdf Runtime Docker Images
 
-The .NET 8.0 runtime image used in this project is [abcpdf/mcr-aspnet:8.0](https://hub.docker.com/repository/docker/abcpdf/mcr-aspnet/general) which is based on the [official Microsoft ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet/) but also includes the requisite libraries required by the linux-native components of ABCpdf as well as a basic set of fonts.
+The .NET 8.0 runtime image used in this project is [abcpdf/mcr-aspnet:8.0-jammy](https://hub.docker.com/repository/docker/abcpdf/mcr-aspnet/general) which is based on the [official Microsoft ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet/) but also includes the requisite libraries required by the linux-native components of ABCpdf as well as a basic set of fonts.
 
 The Dockerfiles used to create the Docker Hub Docker images are [available here](https://hub.docker.com/repositories/abcpdf). You may use these to roll-your-own image.
 
@@ -120,13 +118,13 @@ Due to it's frequent security update cycle we recommend that you use images base
 
 ### Non-root user
 
-The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is available in the deployed production container deployed container.
+The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is unavailable in the deployed container in productio.
 
 ### Reducing Container Attack Surface
 
-Due to ABCpdf.NET and ABCChrome requiring linux-native components it is currently problematic to provide a [chiseled Ubuntu](https://github.com/canonical/chisel) image due to the few number of [libraries that have so far been sliced](https://github.com/canonical/chisel-releases/tree/ubuntu-22.04/slices). This however improving all the time but you may well have to customize your chiseled image.
+Due to ABCpdf.NET and ABCChrome requiring linux-native components it is currently problematic to provide a [chiseled Ubuntu](https://github.com/canonical/chisel) image due to the limited number of [libraries that have so far been sliced](https://github.com/canonical/chisel-releases/tree/ubuntu-22.04/slices). This is however improving all the time but you may well have to add your own library slices to create your chiseled image.
 
-A better solution may be to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler. More information can be found in the slimtoolkit repo's readme.
+A better solution may be to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler to pick up all of ABCpdf dependencies. More information can be found in the slimtoolkit repo's readme.
 
 ## Further Reading
 
