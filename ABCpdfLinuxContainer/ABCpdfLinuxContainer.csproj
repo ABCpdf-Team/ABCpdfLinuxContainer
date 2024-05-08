@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ABCpdf" Version="13.0.0.7" />
-    <PackageReference Include="ABCpdf.ABCChrome117.Linux" Version="13.0.0.7" />
+    <PackageReference Include="ABCpdf" Version="13.1.0" />
+    <PackageReference Include="ABCpdf.ABCChrome123.Linux" Version="13.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />

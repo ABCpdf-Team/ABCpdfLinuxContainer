@@ -1,7 +1,8 @@
 using WebSupergoo.ABCpdf13;
 
 // Set your license code below - preferably using secrets in production
-if(!XSettings.InstallLicense("[-- PASTE YOUR LICENSE CODE HERE --]")) {
+string license = "[-- PASTE YOUR LICENSE CODE HERE --]";
+if (!XSettings.InstallLicense(license)) {
 	throw new Exception("License failed installation.");
 }
 Console.WriteLine($"License: {XSettings.LicenseDescription}");
@@ -21,13 +22,16 @@ if(app.Environment.IsDevelopment()) {
 	app.UseSwaggerUI();
 }
 
-app.MapGet("/htmltopdf", (string htmlString) => {
+app.MapGet("/htmltopdf", (string htmlOrUrl) => {
 	using Doc doc = new();
-	doc.AddImageHtml(htmlString);
-	return Results.File(doc.GetData(), contentType: "application/pdf");
+	if (htmlOrUrl.StartsWith("http"))
+		doc.AddImageUrl(htmlOrUrl);
+	else
+		doc.AddImageHtml(htmlOrUrl);
+	return Results.File(doc.GetData(), contentType: "application/pdf", fileDownloadName: "mypage.pdf");
 })
 .WithOpenApi()
-.WithDescription("Renders the submitted html string into a PDF file.")
+.WithDescription("Renders the submitted HTML or URL into a PDF file.")
 .Produces<byte[]>(StatusCodes.Status200OK, "application/pdf");
 
 app.Run();
