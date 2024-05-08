@@ -15,13 +15,13 @@ RUN dotnet build "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64
-# This is requried to ensure ABCChrome can be launched by user "app" in production
+# This is required to ensure ABCChrome can be launched by user "app" in production
 RUN chmod o+x /app/publish/ABCChrome117/ABCChrome117
 
 ######################################################################################################################################
-# In debug mode the /app folder points to the project folder even if we try to copy the artefacts from the publshing stage into it. 
+# In debug mode the /app folder points to the project folder even if we try to copy the artefacts from the publishing stage into it. 
 # For projects with more complicated linux-native components like ABCChrome this means we have to grab the requiered artefacts from 
-# the 'publish' stage and copy them somewhere in the PATH - so in this case /usr/local/bin for ubuntu.
+# the 'publish' stage and copy them somewhere in the PATH - so in this case /usr/local/bin for Ubuntu.
 #
 # IMPORTANT
 #
@@ -30,11 +30,11 @@ RUN chmod o+x /app/publish/ABCChrome117/ABCChrome117
 #               <DockerfileFastModeStage>debug</DockerfileFastModeStage>
 #           </PropertyGroup>
 #
-#    * The ABCChrome version number WILL need to be chanegd when later versions of ABCpdf updates ABCChrome.
+#    * The ABCChrome version number WILL need to be chanegd when later versions of ABCpdf update ABCChrome.
 #
-#    * The path you copy the native ABCChrome folder must locateable be in the container's PATH.
+#    * The path you copy the native ABCChrome folder must locatable be in the container's PATH.
 #
-# For more information on debugging in docker with Visual Studio see:
+# For more information on debugging in Docker with Visual Studio see:
 # https://learn.microsoft.com/en-gb/visualstudio/containers/container-build?view=vs-2022#modify-container-image-only-for-debugging
 ######################################################################################################################################
 FROM base AS debug
