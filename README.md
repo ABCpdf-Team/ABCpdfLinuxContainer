@@ -15,7 +15,7 @@ This project was initially generated using the ASP.NET Core Web API template usi
 
 Clone the ABCpdfLinuxContainer repository and open the solution in Visual Studio 2022.
 
-Select Docker from the Debugging toolbar dropdown if it isn't already selected. You may be prompted to start Docker Desktop which you should do - it has to be running to run the project in a container.
+Select Docker from the Debugging toolbar dropdown if it is not already selected. You may be prompted to start Docker Desktop which you should do - it has to be running to run the project in a container.
 
 !["Docker Debug Toolbar"](.img/docker-debug-toolbar.png)
 
@@ -23,7 +23,7 @@ The first time the solution is opened and Docker debugging is selected you will 
 
 **Be prepared for this to take 5 or more minutes the first time.** This is the only time you have to wait this long as the build is cached making the subsequent development workflow very fast.
 
-While you wait you should find your ABCpdf license key and paste it into the Program.cs file where indicated near the top of the file.
+While you wait, you should find your ABCpdf license key and paste it into the Program.cs file where indicated near the top of the file.
 
 ```C#
 if(!XSettings.InstallLicense("[-- PASTE YOUR LICENSE CODE HERE --]")) {
@@ -102,7 +102,7 @@ RUN apt-get install -y language-pack-zh* chinese*
 RUN apt-get install -y language-pack-ko install korean*
 ```
 
-Other languages may be similarly installed. See [the Ubuntu language pack pages](https://packages.ubuntu.com/search?keywords=language-pack) to find your desired language pack.
+Other languages may be installed in a similar fashion. See [the Ubuntu language pack pages](https://packages.ubuntu.com/search?keywords=language-pack) to find your desired language pack.
 
 ## ABCpdf Runtime Docker Images
 
