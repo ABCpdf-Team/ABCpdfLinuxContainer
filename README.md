@@ -25,7 +25,7 @@ dotnet user-secrets init
 dotnet user-secrets set "ABCpdf:LicenseKey" "[-- PASTE YOUR LICENSE CODE HERE --]"
 ```
 
-**NB: You are responsible for keeping your ABCpdf private.**
+**NB: You are responsible for keeping your ABCpdf license key secure. For this reason we strongly recommend you use secrets to store it rather than persist it in code.**
 
 #### Build the Solution using the Docker Profile
 
