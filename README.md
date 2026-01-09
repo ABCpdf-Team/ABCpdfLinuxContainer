@@ -15,6 +15,20 @@ This project was initially generated using the ASP.NET Core Web API template usi
 
 Clone the ABCpdfLinuxContainer repository and open the solution in Visual Studio 2022.
 
+#### Set ABCpdf License Key as a Local Secret
+
+You will need to add your ABCpdf license key to your local dotnet secrets store for the project.
+
+```ps
+cd .\ABCpdfLinuxContainer\
+dotnet user-secrets init
+dotnet user-secrets set "ABCpdf:LicenseKey" "[-- PASTE YOUR LICENSE CODE HERE --]"
+```
+
+**NB: You are responsible for keeping your ABCpdf private.**
+
+#### Build the Solution using the Docker Profile
+
 Select Docker from the Debugging toolbar dropdown if it is not already selected. You may be prompted to start Docker Desktop which you should do - it has to be running to run the project in a container.
 
 !["Docker Debug Toolbar"](.img/docker-debug-toolbar.png)
@@ -22,14 +36,6 @@ Select Docker from the Debugging toolbar dropdown if it is not already selected.
 The first time the solution is opened and Docker debugging is selected you will have to wait some time while Visual Studio performs the background task of "Warming up Docker debugging". This is performing a preliminary build of the Dockerfile including pulling the required images from Docker Hub. To see what it is doing and when it has finished check the "Output" tab and "Container Tools" from the dropdown.
 
 **Be prepared for this to take 5 or more minutes the first time.** This is the only time you have to wait this long as the build is cached making the subsequent development workflow very fast.
-
-While you wait, you should find your ABCpdf license key and paste it into the Program.cs file where indicated near the top of the file.
-
-```C#
-if(!XSettings.InstallLicense("[-- PASTE YOUR LICENSE CODE HERE --]")) {
-    throw new Exception("License failed installation.");
-}
-```
 
 Once the Dockerfile has been built as indicated in the Container Tools Output window you can run the application from the debug toolbar as Docker:
 
