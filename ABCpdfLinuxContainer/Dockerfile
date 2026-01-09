@@ -40,7 +40,7 @@ RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
 #
 #    * The ABCChrome version number WILL need to be changed when later versions of ABCpdf update ABCChrome.
 #
-#    * The path you copy the native ABCChrome folder must locatable be in the container's PATH.
+#    * The path you copy the native ABCChrome folder must be locatable in the container's PATH.
 #
 # For more information on debugging in Docker with Visual Studio see:
 # https://learn.microsoft.com/en-gb/visualstudio/containers/container-build?view=vs-2022#modify-container-image-only-for-debugging
