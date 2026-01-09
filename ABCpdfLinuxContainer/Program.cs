@@ -1,22 +1,22 @@
 using WebSupergoo.ABCpdf13;
 
-// Set your license code below - preferably using secrets in production
-string license = "[-- PASTE YOUR LICENSE CODE HERE --]";
-if (!XSettings.InstallLicense(license)) {
-	throw new Exception("License failed installation.");
-}
-Console.WriteLine($"License: {XSettings.LicenseDescription}");
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Set the license from dotnet secrets
+var abcPdfLicense = builder.Configuration["ABCpdf:LicenseKey"] ?? 
+	throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret or environment variable.");
+
+if (!XSettings.InstallLicense(abcPdfLicense)) {
+    throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
+}
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if(app.Environment.IsDevelopment()) {
 	app.UseSwagger();
 	app.UseSwaggerUI();
@@ -30,7 +30,6 @@ app.MapGet("/htmltopdf", (string htmlOrUrl) => {
 		doc.AddImageHtml(htmlOrUrl);
 	return Results.File(doc.GetData(), contentType: "application/pdf", fileDownloadName: "mypage.pdf");
 })
-.WithOpenApi()
 .WithDescription("Renders the submitted HTML or URL into a PDF file.")
 .Produces<byte[]>(StatusCodes.Status200OK, "application/pdf");
 
