@@ -5,8 +5,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Set the license from dotnet secrets
 var abcPdfLicense = builder.Configuration["ABCpdf:LicenseKey"];
 
+if (string.IsNullOrWhiteSpace(abcPdfLicense)) {
+    throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret (for example via dotnet user-secrets or environment variables).");
+}
+
 if (!XSettings.InstallLicense(abcPdfLicense)) {
-	throw new Exception($"License failed installation: {abcPdfLicense}");
+    throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
 }
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
