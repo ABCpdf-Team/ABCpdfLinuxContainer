@@ -1,6 +1,6 @@
 # ABCpdf in a Linux Container
 
-Linux has been supported since version 13 of ABCpdf. Here is an example project to show how to run ABCpdf as a containerized microservice using a Docker image based on the official Microsoft ASP.NET Core (in turn based on Ubuntu 22.04 LTS). This allows in-container debugging in Visual Studio 2022 and later. You may use this as a template for your own ABCpdf-powered microservice.
+Linux has been supported since version 13 of ABCpdf. Here is an example project to show how to run ABCpdf as a containerized microservice using a Docker image based on the official Microsoft ASP.NET Core (in turn based on latest Ubuntu LTS - [see here for tags for other versions of Linux](https://hub.docker.com/repository/docker/abcpdf/mcr-aspnet/general)) This allows in-container debugging in Visual Studio 2022 and later. You may use this as a template for your own ABCpdf-powered microservice.
 
 This project was initially generated using the ASP.NET Core Web API template using Visual Studio 2022 with the default options of Docker and OpenAPI support enabled. It uses the minimal API model to expose a test endpoint.
 

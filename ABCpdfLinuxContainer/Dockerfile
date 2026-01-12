@@ -1,4 +1,4 @@
-FROM abcpdf/mcr-aspnet:10.0-noble AS base
+FROM abcpdf/mcr-aspnet:10.0 AS base
 
 # needed for ABCChrome123
 RUN apt-get update -y
@@ -14,7 +14,6 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj", "ABCpdfLinuxContainer/"]
-#COPY ["ABCpdfLinuxContainer/nuget.config", "ABCpdfLinuxContainer/"]
 RUN dotnet restore "./ABCpdfLinuxContainer/./ABCpdfLinuxContainer.csproj"
 COPY . .
 WORKDIR "/src/ABCpdfLinuxContainer"
@@ -27,9 +26,9 @@ RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /a
 RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
 
 ######################################################################################################################################
-# In debug mode the /app folder points to the project folder even if we try to copy the artefacts from the publishing stage into it. 
-# For projects with more complicated linux-native components like ABCChrome this means we have to grab the required artefacts from 
-# the 'publish' stage and copy them somewhere in the PATH - so in this case /usr/local/bin for Ubuntu.
+# In Docker debug mode the /app folder points to the local project folder. This means linux-native components will not be found. 
+# As a workaround for debugging only - we need copy ABCChrome from the 'publish' stage and copy them somewhere in the PATH such as 
+# /usr/local/bin.
 #
 # IMPORTANT
 #
