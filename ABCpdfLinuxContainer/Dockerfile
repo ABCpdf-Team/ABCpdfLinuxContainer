@@ -1,6 +1,6 @@
 FROM abcpdf/mcr-aspnet:10.0 AS base
 
-# needed for ABCChrome123
+# needed for ABCChrome146
 RUN apt-get update -y
 RUN apt update --fix-missing 
 RUN apt-get upgrade -y
@@ -23,7 +23,7 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./ABCpdfLinuxContainer.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64
 # This is required to ensure ABCChrome can be launched by user "app" in production
-RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
+RUN chmod o+x /app/publish/ABCChrome146/ABCChrome146
 
 ######################################################################################################################################
 # In Docker debug mode the /app folder points to the local project folder. This means linux-native components will not be found. 
@@ -46,7 +46,7 @@ RUN chmod o+x /app/publish/ABCChrome123/ABCChrome123
 ######################################################################################################################################
 FROM base AS debug
 WORKDIR /app
-COPY --from=publish /app/publish/ABCChrome123 /usr/local/bin/ABCChrome123
+COPY --from=publish /app/publish/ABCChrome146 /usr/local/bin/ABCChrome146
 
 FROM base AS final
 WORKDIR /app

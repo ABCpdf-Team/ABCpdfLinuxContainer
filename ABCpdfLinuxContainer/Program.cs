@@ -1,4 +1,4 @@
-using WebSupergoo.ABCpdf13;
+using WebSupergoo.ABCpdf14;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,9 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 var abcPdfLicense = builder.Configuration["ABCpdf:LicenseKey"] ?? 
 	throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret or environment variable.");
 
-if (!XSettings.InstallLicense(abcPdfLicense)) {
+if (!XSettings.InstallLicense(abcPdfLicense))
     throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
-}
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
