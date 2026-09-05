@@ -116,11 +116,11 @@ The Dockerfiles used to create the Docker Hub Docker images are [available here]
 
 ### Our Update Cycle
 
-All of our images are updated latest OS security and pacckage updates and pushed to Docker Hub every Tuesday.
+All of our images are rebuilt with the latest OS security and package updates and pushed to the Docker Hub every Tuesday at 3am UTC.
 
-### ABCpdf Chiseled Ubunutu Images
+### ABCpdf Chiseled Ubuntu Images
 
-We now offer [chiseled Ubuntu images](https://hub.docker.com/r/abcpdf/abcpdf/tags) to totally maximise your application's attack surface. These images contain no shell and virtually no commands. These are strongly recommended for production environments.
+We now offer [chiseled Ubuntu images](https://hub.docker.com/r/abcpdf/abcpdf/tags) to maximise your application's attack surface. These images contain no shell and virtually no commands. These are strongly recommended for production environments.
 
 ### Non-root user
 
