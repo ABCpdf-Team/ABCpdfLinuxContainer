@@ -1,10 +1,4 @@
-FROM abcpdf/mcr-aspnet:10.0 AS base
-
-# needed for ABCChrome146
-RUN apt-get update -y
-RUN apt update --fix-missing 
-RUN apt-get upgrade -y
-RUN apt install -y curl
+FROM abcpdf/abcpdf:14 AS base
 
 USER app
 WORKDIR /app

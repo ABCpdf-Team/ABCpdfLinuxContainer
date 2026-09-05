@@ -1,6 +1,6 @@
 # ABCpdf in a Linux Container
 
-Here is an example project to show how to run ABCpdf as a containerized microservice using a Docker image based on the official Microsoft ASP.NET Core (in turn based on latest Ubuntu LTS - [see here for tags for other versions of Linux](https://hub.docker.com/repository/docker/abcpdf/mcr-aspnet/general)) This allows in-container debugging in Visual Studio 2026 and later. You may use this as a template for your own ABCpdf-powered microservice.
+Here is an example project to show how to use the [ABCpdf docker hub images](https://hub.docker.com/r/abcpdf/abcpdf) to build, debug and deply an ABCpdf-powered containerized microservice.
 
 This project was initially generated using the ASP.NET Core Web API template using Visual Studio 2026 with the default options of Docker and OpenAPI support enabled. It uses the minimal API model to expose a test endpoint.
 
@@ -25,7 +25,7 @@ dotnet user-secrets init
 dotnet user-secrets set "ABCpdf:LicenseKey" "[-- PASTE YOUR LICENSE CODE HERE --]"
 ```
 
-**NB: You are responsible for keeping your ABCpdf license key secure. For this reason we strongly recommend you use secrets to store it rather than persist it in code.**
+**NB: You are responsible for keeping your ABCpdf license key secure. For this reason we strongly recommend you use secrets to store. You should never persist your license key in a code repository.**
 
 #### Build the Solution using the Docker Profile
 
@@ -82,7 +82,7 @@ For other languages you will need to install additional fonts and/or language pa
 A good balance for CJK languages is to simply add the installation of the [Google's Noto fonts](https://fonts.google.com/noto) CJK package to the Dockerfile:
 
 ```Dockerfile
-FROM abcpdf/mcr-aspnet:8.0-jammy AS base
+FROM abcpdf/abcpdf:14 AS base
 WORKDIR /app
 EXPOSE 8080
 RUN apt-get update && apt-get install -y fonts-noto-cjk
@@ -96,7 +96,7 @@ There are [additional Noto languages packages here](https://packages.debian.org/
 Alternatively you may install the relevant language packs using following commands to the runtime Dockerfile:
 
 ```Dockerfile
-FROM abcpdf/mcr-aspnet:8.0-jammy AS base
+FROM abcpdf/abcpdf:14 AS base
 WORKDIR /app
 EXPOSE 8080
 RUN apt-get update
@@ -110,30 +110,22 @@ RUN apt-get install -y language-pack-ko install korean*
 
 Other languages may be installed in a similar fashion. See [the Ubuntu language pack pages](https://packages.ubuntu.com/search?keywords=language-pack) to find your desired language pack.
 
-## ABCpdf Runtime Docker Images
+The Dockerfiles used to create the Docker Hub Docker images are [available here](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/tree/main/dockerfiles). You may use these to roll-your-own image.
 
-The .NET 8.0 runtime image used in this project is [abcpdf/mcr-aspnet:8.0-jammy](https://hub.docker.com/repository/docker/abcpdf/mcr-aspnet/general) which is based on the [official Microsoft ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet/) but also includes the requisite libraries required by the linux-native components of ABCpdf as well as a basic set of fonts.
+## Security Considerations
 
-The Dockerfiles used to create the Docker Hub Docker images are [available here](https://hub.docker.com/repositories/abcpdf). You may use these to roll-your-own image.
+### Our Update Cycle
 
-## Container Security Considerations
+All of our images are updated latest OS security and pacckage updates and pushed to Docker Hub every Tuesday.
 
-### Base Image
+### ABCpdf Chiseled Ubunutu Images
 
-Due to it's frequent security update cycle we recommend that you use images based on the latest Ubuntu LTS version. We also recommend that you use the latest LTS version of .NET.
-
-we also suggest that add an `RUN apt-get upgrade -y` step in the runtime phase of your own Dockerfile.
+We now offer [chiseled Ubuntu images](https://hub.docker.com/r/abcpdf/abcpdf/tags) to totally maximise your application's attack surface. These images contain no shell and virtually no commands. These are strongly recommended for production environments.
 
 ### Non-root user
 
-The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is unavailable in the deployed container in production.
-
-### Reducing Container Attack Surface
-
-Due to ABCpdf.NET and ABCChrome requiring linux-native components it is currently problematic to provide a [chiseled Ubuntu](https://github.com/canonical/chisel) image due to the limited number of [libraries that have so far been sliced](https://github.com/canonical/chisel-releases/tree/ubuntu-22.04/slices). This is however improving all the time but until then you will have to create your own library slices to create your chiseled image.
-
-A better solution may be to use [slim toolkit](https://github.com/slimtoolkit/slim) prior to deployment to reduce the number of unnecessary components, and hence attack surface, in your deployed container. You will need to ensure that the probes that you utilize in your pipeline provide adequate data for the Slim profiler to pick up all of ABCpdf dependencies. More information can be found in the slimtoolkit repo's readme.
+The Dockerfile we use in this project makes use of the 'app' USER as specified in the [ASP.NET Core Runtime images](https://hub.docker.com/_/microsoft-dotnet-aspnet/). This ensures that root access is unavailable in the deployed container in production if you are unable to use chiseled images (see above).
 
 ## Further Reading
 
-Please refer to [the latest ABCpdf linux documentation](https://www.websupergoo.com/helppdfnet/default.htm?page=source%2f2-getting_started%2f6-platforms.htm) for further information.
+You should refer to [ABCpdf Dockerfile GitHub repoisto](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/) for the latest docker-specific information.
