@@ -1,0 +1,34 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj
+
+      - name: Build
+        run: dotnet build ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj -c Release --no-restore
+
+      # ABCpdfLinuxContainer.Tests builds and runs the real container image via Testcontainers,
+      # so this exercises the actual Dockerfile/health check/htmltopdf endpoint end-to-end.
+      - name: Test
+        env:
+          ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
+        run: dotnet test ABCpdfLinuxContainer.Tests/ABCpdfLinuxContainer.Tests.csproj
