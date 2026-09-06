@@ -1,0 +1,8 @@
+<Project>
+
+  <!-- Shared across ABCpdfLinuxContainer and ABCpdfLinuxContainer.Tests so they can't drift apart. -->
+  <ItemGroup>
+    <PackageReference Include="ABCpdf" Version="14.0.5" />
+  </ItemGroup>
+
+</Project>

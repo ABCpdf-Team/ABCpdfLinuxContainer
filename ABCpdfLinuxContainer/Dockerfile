@@ -45,5 +45,7 @@ COPY --from=publish /app/publish/ABCChrome146 /usr/local/bin/ABCChrome146
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
 ENTRYPOINT ["dotnet", "ABCpdfLinuxContainer.dll"]
 
