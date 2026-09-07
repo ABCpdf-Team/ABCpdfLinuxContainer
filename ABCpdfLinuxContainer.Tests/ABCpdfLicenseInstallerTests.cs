@@ -1,65 +1,69 @@
-using WebSupergoo.ABCpdf14;
-
 namespace ABCpdfLinuxContainer.Tests;
 
-// Exercises real environment variables and a real temp file rather than injected fakes, so this
-// mutates process-wide state (Environment.SetEnvironmentVariable) - see AssemblyInfo.cs for why
-// test parallelization is disabled for this assembly.
 public class ABCpdfLicenseInstallerTests : IDisposable
 {
-	readonly string? _originalEnvValue = Environment.GetEnvironmentVariable(ABCpdfLicenseInstaller.EnvVarName);
+	// A per-instance unique name so these tests can never collide with the real ABCPDF_LICENSE_KEY
+	// or with each other, even running in parallel.
+	readonly string _envVarName = $"TEST_LICENSE_KEY_{Guid.NewGuid():N}";
 	readonly string _secretsFilePath = Path.GetTempFileName();
 
 	public void Dispose()
 	{
-		Environment.SetEnvironmentVariable(ABCpdfLicenseInstaller.EnvVarName, _originalEnvValue);
+		Environment.SetEnvironmentVariable(_envVarName, null);
 		File.Delete(_secretsFilePath);
-	}
-
-	public static IEnumerable<object?[]> ResolutionScenarios()
-	{
-		yield return ["from-env", $"{ABCpdfLicenseInstaller.EnvVarName}=from-secrets", "from-env"];
-		yield return ["", $"{ABCpdfLicenseInstaller.EnvVarName}=from-secrets", "from-secrets"];
-		yield return [null, $"{ABCpdfLicenseInstaller.EnvVarName}=\"from-secrets\"", "from-secrets"];
-		yield return [null, "SOME_OTHER_KEY=value", null];
-		yield return [null, null, null];
-	}
-
-	[Theory]
-	[MemberData(nameof(ResolutionScenarios))]
-	public void ResolveKey_reflects_the_real_environment_variable_and_secrets_file(string? envValue, string? secretsFileContent, string? expected)
-	{
-		Environment.SetEnvironmentVariable(ABCpdfLicenseInstaller.EnvVarName, envValue);
-		if (secretsFileContent is null)
-			File.Delete(_secretsFilePath);
-		else
-			File.WriteAllText(_secretsFilePath, secretsFileContent);
-
-		var result = ABCpdfLicenseInstaller.ResolveKey(Environment.GetEnvironmentVariable, _secretsFilePath, File.Exists, File.ReadAllLines);
-
-		Assert.Equal(expected, result);
-	}
-
-	[Fact]
-	public void ResolveKey_ignores_the_secrets_file_when_path_is_null()
-	{
-		Environment.SetEnvironmentVariable(ABCpdfLicenseInstaller.EnvVarName, null);
-		File.WriteAllText(_secretsFilePath, $"{ABCpdfLicenseInstaller.EnvVarName}=from-secrets");
-
-		var result = ABCpdfLicenseInstaller.ResolveKey(Environment.GetEnvironmentVariable, null, File.Exists, File.ReadAllLines);
-
-		Assert.Null(result);
 	}
 
 	[Theory]
 	[InlineData(null)]
-	[InlineData("not-a-real-license-key")]
-	public void InstallAndValidate_throws_for_an_unconfigured_or_invalid_key(string? envValue)
+	[InlineData("")]
+	[InlineData("   ")]
+	public void Install_throws_not_configured_when_env_var_is_missing_or_blank(string? envValue)
 	{
-		Environment.SetEnvironmentVariable(ABCpdfLicenseInstaller.EnvVarName, envValue);
+		Environment.SetEnvironmentVariable(_envVarName, envValue);
 
-		Assert.Throws<InvalidOperationException>(() =>
-			ABCpdfLicenseInstaller.InstallAndValidate(Environment.GetEnvironmentVariable, null, File.Exists, File.ReadAllLines));
+		var ex = Assert.Throws<InvalidOperationException>(() => ABCpdfLicenseInstaller.Install(_envVarName));
+
+		Assert.Contains("not configured", ex.Message);
+	}
+
+	[Fact]
+	public void Install_throws_not_configured_when_secrets_file_lacks_the_key()
+	{
+		File.WriteAllText(_secretsFilePath, "SOME_OTHER_KEY=value");
+
+		var ex = Assert.Throws<InvalidOperationException>(() => ABCpdfLicenseInstaller.Install(_envVarName, _secretsFilePath));
+
+		Assert.Contains("not configured", ex.Message);
+	}
+
+	[Fact]
+	public void Install_ignores_the_secrets_file_when_no_path_is_given()
+	{
+		File.WriteAllText(_secretsFilePath, $"{_envVarName}=not-a-real-license-key");
+
+		var ex = Assert.Throws<InvalidOperationException>(() => ABCpdfLicenseInstaller.Install(_envVarName));
+
+		Assert.Contains("not configured", ex.Message);
+	}
+
+	[Fact]
+	public void Install_reads_the_key_from_the_secrets_file_when_the_env_var_is_unset()
+	{
+		File.WriteAllText(_secretsFilePath, $"{_envVarName}=not-a-real-license-key");
+
+		var ex = Assert.Throws<InvalidOperationException>(() => ABCpdfLicenseInstaller.Install(_envVarName, _secretsFilePath));
+
+		Assert.Contains("invalid", ex.Message);
+	}
+
+	[Fact]
+	public void Install_throws_invalid_for_a_rejected_env_var_key()
+	{
+		Environment.SetEnvironmentVariable(_envVarName, "not-a-real-license-key");
+
+		var ex = Assert.Throws<InvalidOperationException>(() => ABCpdfLicenseInstaller.Install(_envVarName));
+
+		Assert.Contains("invalid", ex.Message);
 	}
 
 	[Fact]

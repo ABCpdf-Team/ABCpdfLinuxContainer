@@ -1,12 +1,13 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
-using WebSupergoo.ABCpdf14;
 
 namespace ABCpdfLinuxContainer.Tests;
 
 public sealed class HtmlToPdfEndpointTests : IAsyncLifetime
 {
+	const string EnvVarName = "ABCPDF_LICENSE_KEY";
+
 	string _licenseKey = "";
 	IFutureDockerImage? _image;
 	IContainer? _container;
@@ -15,9 +16,9 @@ public sealed class HtmlToPdfEndpointTests : IAsyncLifetime
 	public async ValueTask InitializeAsync()
 	{
 		// Checked first so a missing key fails immediately instead of after building the image.
-		_licenseKey = Environment.GetEnvironmentVariable(ABCpdfLicenseInstaller.EnvVarName) is { Length: > 0 } key
+		_licenseKey = Environment.GetEnvironmentVariable(EnvVarName) is { Length: > 0 } key
 			? key
-			: throw new InvalidOperationException($"{ABCpdfLicenseInstaller.EnvVarName} must be set to run these integration tests.");
+			: throw new InvalidOperationException($"{EnvVarName} must be set to run these integration tests.");
 
 		_image = new ImageFromDockerfileBuilder()
 			.WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
@@ -28,14 +29,14 @@ public sealed class HtmlToPdfEndpointTests : IAsyncLifetime
 
 		_container = new ContainerBuilder(_image)
 			.WithPortBinding(8080, true)
-			.WithEnvironment(ABCpdfLicenseInstaller.EnvVarName, _licenseKey)
+			.WithEnvironment(EnvVarName, _licenseKey)
 			.WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPort(8080).ForPath("/health")))
 			.Build();
 		await _container.StartAsync();
 
 		_client = new HttpClient { BaseAddress = new Uri($"http://localhost:{_container.GetMappedPublicPort(8080)}") };
 
-		ABCpdfLicenseInstaller.InstallAndValidate(_ => _licenseKey, null, _ => false, _ => []);
+		ABCpdfLicenseInstaller.Install(EnvVarName);
 	}
 
 	public async ValueTask DisposeAsync()

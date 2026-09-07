@@ -1,15 +1,28 @@
 version: 2
 updates:
+  # ABCpdf* packages are capped at minor/patch here deliberately: a major bump also needs the
+  # abcpdf/abcpdf Docker base image tag below (proposed independently, since Dependabot can't
+  # couple updates across ecosystems into one PR) and the ABCChrome146 path in the Dockerfile
+  # bumped to match by hand - merging just the package update alone would leave the container
+  # running a mismatched native ABCpdf version. If the docker update below bumps abcpdf/abcpdf to
+  # a new major version, bump these packages (and the ABCChrome146 path) to match manually.
   - package-ecosystem: "nuget"
     directory: "/ABCpdfLinuxContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ABCpdf*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "nuget"
     directory: "/ABCpdfLinuxContainer.Tests"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ABCpdf*"
+        update-types: ["version-update:semver-major"]
 
+  # Left unrestricted, including major bumps - see the note above the nuget entries.
   - package-ecosystem: "docker"
     directory: "/ABCpdfLinuxContainer"
     schedule:

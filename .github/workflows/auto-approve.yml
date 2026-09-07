@@ -1,4 +1,4 @@
-name: Dependabot Auto-Approve
+name: Auto-Approve Automated PRs
 
 on:
   workflow_run:
@@ -13,10 +13,16 @@ jobs:
     if: >
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.actor.login == 'dependabot[bot]'
+      (
+        github.event.workflow_run.actor.login == 'dependabot[bot]' ||
+        startsWith(github.event.workflow_run.head_branch, 'bump/')
+      )
     runs-on: ubuntu-latest
     steps:
-      - name: Approve the Dependabot pull request
+      # Uses the default GITHUB_TOKEN (github-actions[bot]) rather than REPO_PAT deliberately:
+      # a "bump/*" PR is opened as whichever account owns REPO_PAT, and GitHub refuses to let an
+      # account approve its own pull request, so approval must come from a different identity.
+      - name: Approve the pull request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

@@ -1,18 +1,18 @@
-name: Bump ABCpdf / .NET Version
+name: Bump .NET / ABCpdf Version
 
 on:
   workflow_dispatch:
     inputs:
-      abcpdf_version:
-        description: "New ABCpdf NuGet package version (e.g. 14.0.6)"
-        required: true
-        type: string
-        default: "14.0.5"
       dotnet_version:
         description: "New .NET version (e.g. 10.0 or 11.0)"
         required: true
         type: string
         default: "10.0"
+      abcpdf_version:
+        description: "New ABCpdf NuGet package version (e.g. 14.0.6 or 15.0.0)"
+        required: true
+        type: string
+        default: "14.0.5"
 
 permissions:
   contents: write
@@ -31,21 +31,19 @@ jobs:
         with:
           token: ${{ secrets.REPO_PAT }}
 
+      - name: Update .NET target framework and SDK image
+        run: |
+          sed -i -E 's/(<TargetFramework>net)[0-9]+\.[0-9]+(<\/TargetFramework>)/\1${{ inputs.dotnet_version }}\2/' Directory.Build.props
+          sed -i -E "s#(mcr\.microsoft\.com/dotnet/sdk:)[0-9]+\.[0-9]+#\1${{ inputs.dotnet_version }}#" ABCpdfLinuxContainer/Dockerfile
+
       - name: Update ABCpdf package versions
         run: |
-          sed -i -E 's/(Include="ABCpdf" Version=")[^"]+(")/\1${{ inputs.abcpdf_version }}\2/' Directory.Build.props
-          sed -i -E 's/(Include="ABCpdf\.ABCChrome146\.Linux" Version=")[^"]+(")/\1${{ inputs.abcpdf_version }}\2/' ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj
+          sed -i -E 's/(Include="ABCpdf(\.ABCChrome146\.Linux)?" Version=")[^"]+(")/\1${{ inputs.abcpdf_version }}\3/' Directory.Build.props
 
       - name: Update ABCpdf Docker base image tag
         run: |
           major="$(cut -d. -f1 <<< '${{ inputs.abcpdf_version }}')"
           sed -i -E "s#(FROM abcpdf/abcpdf:)[0-9]+#\1${major}#" ABCpdfLinuxContainer/Dockerfile
-
-      - name: Update .NET target framework and SDK image
-        run: |
-          sed -i -E 's/(<TargetFramework>net)[0-9]+\.[0-9]+(<\/TargetFramework>)/\1${{ inputs.dotnet_version }}\2/' ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj
-          sed -i -E 's/(<TargetFramework>net)[0-9]+\.[0-9]+(<\/TargetFramework>)/\1${{ inputs.dotnet_version }}\2/' ABCpdfLinuxContainer.Tests/ABCpdfLinuxContainer.Tests.csproj
-          sed -i -E "s#(mcr\.microsoft\.com/dotnet/sdk:)[0-9]+\.[0-9]+#\1${{ inputs.dotnet_version }}#" ABCpdfLinuxContainer/Dockerfile
 
       - name: Fail if nothing changed
         run: |
@@ -58,21 +56,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.REPO_PAT }}
         run: |
-          branch="bump/abcpdf-${{ inputs.abcpdf_version }}-dotnet-${{ inputs.dotnet_version }}"
+          branch="bump/dotnet-${{ inputs.dotnet_version }}-abcpdf-${{ inputs.abcpdf_version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git commit -am "Bump ABCpdf to ${{ inputs.abcpdf_version }} and .NET to ${{ inputs.dotnet_version }}"
+          git commit -am "Bump .NET to ${{ inputs.dotnet_version }} and ABCpdf to ${{ inputs.abcpdf_version }}"
           git push origin "$branch"
           gh pr create \
-            --title "Bump ABCpdf to ${{ inputs.abcpdf_version }} and .NET to ${{ inputs.dotnet_version }}" \
-            --body "Automated version bump via the **Bump ABCpdf / .NET Version** workflow.
+            --title "Bump .NET to ${{ inputs.dotnet_version }} and ABCpdf to ${{ inputs.abcpdf_version }}" \
+            --body "Automated version bump via the **Bump .NET / ABCpdf Version** workflow.
 
           Updates:
-          - \`ABCpdf\` and \`ABCpdf.ABCChrome146.Linux\` package versions in \`Directory.Build.props\`
-          - \`TargetFramework\` in both \`.csproj\` files
-          - the \`abcpdf/abcpdf\` and \`mcr.microsoft.com/dotnet/sdk\` base image tags in the Dockerfile
+          - \`TargetFramework\` (shared via \`Directory.Build.props\`) and the \`mcr.microsoft.com/dotnet/sdk\` Dockerfile base image tag
+          - \`ABCpdf\` and \`ABCpdf.ABCChrome146.Linux\` package versions, and the \`abcpdf/abcpdf\` Dockerfile base image tag
 
-          Not touched: the \`ABCChrome146\` folder/path references in the Dockerfile, since that number tracks the bundled Chrome build and isn't derivable from the ABCpdf version alone - check ABCpdf's own release notes and update those manually if needed." \
+          The two ABCpdf-related changes are bumped together deliberately: Dependabot proposes ABCpdf NuGet minor/patch updates and Docker base image updates (including major) independently, but a major ABCpdf bump needs its NuGet package version and Docker image tag to move together - merging one without the other leaves the container running mismatched native/managed ABCpdf versions. Leave \`abcpdf_version\` at its current value to bump only .NET, or vice versa.
+
+          Not touched, and worth checking on a major version bump specifically:
+          - the \`WebSupergoo.ABCpdf14\` global using in \`Directory.Build.props\` - the namespace itself is version-baked and may need to become e.g. \`WebSupergoo.ABCpdf15\`
+          - the \`ABCChrome146\` folder/path references in the Dockerfile, since that number tracks the bundled Chrome build and isn't derivable from the ABCpdf version alone
+
+          Check ABCpdf's own release notes for both before merging." \
             --base master \
             --head "$branch"
