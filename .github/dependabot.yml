@@ -39,22 +39,19 @@ updates:
       semver-patch-days: 3
 
   # Left unrestricted, including major bumps - see the note above the nuget entries.
+  # semver-*-days isn't supported for this ecosystem (tags aren't guaranteed to be semver), so
+  # only default-days applies here.
   - package-ecosystem: "docker"
     directory: "/ABCpdfLinuxContainer"
     schedule:
       interval: "weekly"
     cooldown:
       default-days: 7
-      semver-major-days: 14
-      semver-minor-days: 7
-      semver-patch-days: 3
 
+  # semver-*-days isn't supported for this ecosystem either - see the docker entry above.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     cooldown:
       default-days: 7
-      semver-major-days: 14
-      semver-minor-days: 7
-      semver-patch-days: 3
