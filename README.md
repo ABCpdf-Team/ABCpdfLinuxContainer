@@ -1,6 +1,6 @@
 # ABCpdf in a Linux Container
 
-Here is an example project to show how to use the [ABCpdf docker hub images](https://hub.docker.com/r/abcpdf/abcpdf) to build, debug and deply an ABCpdf-powered containerized microservice.
+Here is an example project to show how to use the [ABCpdf docker hub images](https://hub.docker.com/r/abcpdf/abcpdf) to build, debug and deploy an ABCpdf .NET powered containerized microservice.
 
 This project was initially generated using the ASP.NET Core Web API template using Visual Studio 2026 with the default options of Docker and OpenAPI support enabled. It uses the minimal API model to expose a test endpoint.
 
@@ -128,4 +128,4 @@ The Dockerfile we use in this project makes use of the 'app' USER as specified i
 
 ## Further Reading
 
-You should refer to [ABCpdf Dockerfile GitHub repoisto](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/) for the latest docker-specific information.
+You should refer to [ABCpdf Dockerfile GitHub repoistory](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/) for the latest docker-specific information.
