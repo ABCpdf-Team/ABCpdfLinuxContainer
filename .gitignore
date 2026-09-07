@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /ABCpdfLinuxContainer/nuget-local
+
+# Local secrets for testing the GitHub Actions workflow (see .secrets.example)
+.secrets

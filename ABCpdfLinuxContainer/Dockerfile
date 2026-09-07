@@ -7,6 +7,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["Directory.Build.props", "./"]
 COPY ["ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj", "ABCpdfLinuxContainer/"]
 RUN dotnet restore "./ABCpdfLinuxContainer/./ABCpdfLinuxContainer.csproj"
 COPY . .
@@ -45,5 +46,7 @@ COPY --from=publish /app/publish/ABCChrome146 /usr/local/bin/ABCChrome146
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
 ENTRYPOINT ["dotnet", "ABCpdfLinuxContainer.dll"]
 

@@ -15,17 +15,17 @@ This project was initially generated using the ASP.NET Core Web API template usi
 
 Clone the ABCpdfLinuxContainer repository and open the solution in Visual Studio 2026.
 
-#### Set ABCpdf License Key as a Local Secret
+#### Set Your ABCpdf License Key
 
-You will need to add your ABCpdf license key to your local dotnet secrets store for the project.
+The application reads its license key from the `ABCPDF_LICENSE_KEY` environment variable.
 
 ```ps
-cd .\ABCpdfLinuxContainer\
-dotnet user-secrets init
-dotnet user-secrets set "ABCpdf:LicenseKey" "[-- PASTE YOUR LICENSE CODE HERE --]"
+$env:ABCPDF_LICENSE_KEY = "[-- PASTE YOUR LICENSE CODE HERE --]"
 ```
 
-**NB: You are responsible for keeping your ABCpdf license key secure. For this reason we strongly recommend you use secrets to store. You should never persist your license key in a code repository.**
+For local development you can instead copy [`.secrets.example`](.secrets.example) at the repo root to `.secrets` and paste your key in there - it's git-ignored, and only ever consulted in Debug builds when the environment variable isn't set.
+
+**NB: You are responsible for keeping your ABCpdf license key secure. You should never persist your license key in a code repository.**
 
 #### Build the Solution using the Docker Profile
 
@@ -43,7 +43,9 @@ This will spin up a container to run the application launch your default browser
 
 ### Trying It Out
 
-The Swagger UI will show one GET endpoint of `/htmltopdf/` which simply implements [AddImageHtml()](https://www.websupergoo.com/helppdfnet/default.htm?page=source%2f5-abcpdf%2fdoc%2f1-methods%2faddimagehtml.htm) on the text.
+The Swagger UI will show one GET endpoint of `/htmltopdf` which takes a single `htmlOrUrl` parameter. If the value starts with `http` it's rendered via `AddImageUrl()`; otherwise it's treated as raw HTML and rendered via [AddImageHtml()](https://www.websupergoo.com/helppdfnet/default.htm?page=source%2f5-abcpdf%2fdoc%2f1-methods%2faddimagehtml.htm).
+
+The application also exposes a `/health` endpoint (backed by ASP.NET Core health checks), which the container image's own Docker `HEALTHCHECK` polls to report its readiness.
 
 Expand the section for this endpoint and click the "Try it out" button and enter some HTML like the following.
 
@@ -58,7 +60,7 @@ Now you should see the byte array contents of a PDF document displayed as text i
 To actually view the generated PDF copy the link in the "Request URL" and paste it into the address bar of your browser. It will be something like the following but with a randomly generated port:
 
 ```bash
-http://localhost:5521/htmltopdf?htmlString=%3Cb%3EHello%3C%2Fb%3E%20%3Cem%3Eworld%3C%2Fem%3E
+http://localhost:5521/htmltopdf?htmlOrUrl=%3Cb%3EHello%3C%2Fb%3E%20%3Cem%3Eworld%3C%2Fem%3E
 ```
 This should load up a PDF in the browser as follows:
 !["PDF Test OUtput"](.img/PDFoutput.png)
@@ -83,11 +85,13 @@ A good balance for CJK languages is to simply add the installation of the [Googl
 
 ```Dockerfile
 FROM abcpdf/abcpdf:14 AS base
+RUN apt-get update && apt-get install -y fonts-noto-cjk && fc-cache -f -v
+USER app
 WORKDIR /app
 EXPOSE 8080
-RUN apt-get update && apt-get install -y fonts-noto-cjk
-RUN fc-cache -f -v
 ```
+
+Install packages before the `USER app` line - the container runs as that non-root user from there on, and `apt-get` needs root.
 
 There are [additional Noto languages packages here](https://packages.debian.org/sid/fonts-noto).
 
@@ -97,8 +101,6 @@ Alternatively you may install the relevant language packs using following comman
 
 ```Dockerfile
 FROM abcpdf/abcpdf:14 AS base
-WORKDIR /app
-EXPOSE 8080
 RUN apt-get update
 # Japanese
 RUN apt-get install -y language-pack-ja install japan*
@@ -106,6 +108,9 @@ RUN apt-get install -y language-pack-ja install japan*
 RUN apt-get install -y language-pack-zh* chinese*
 # Korean
 RUN apt-get install -y language-pack-ko install korean*
+USER app
+WORKDIR /app
+EXPOSE 8080
 ```
 
 Other languages may be installed in a similar fashion. See [the Ubuntu language pack pages](https://packages.ubuntu.com/search?keywords=language-pack) to find your desired language pack.
@@ -120,7 +125,7 @@ All of our images are rebuilt with the latest OS security and package updates an
 
 ### ABCpdf Chiseled Ubuntu Images
 
-We now offer [chiseled Ubuntu images](https://hub.docker.com/r/abcpdf/abcpdf/tags) to maximise your application's attack surface. These images contain no shell and virtually no commands. These are strongly recommended for production environments.
+We now offer [chiseled Ubuntu images](https://hub.docker.com/r/abcpdf/abcpdf/tags) to maximise your application's attack surface. These images contain no shell and virtually no commands. These are strongly recommended for production environments. See the [chiseled image customisation guide](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/blob/main/Chisel-customisation.md) for how to customise a chiseled base image.
 
 ### Non-root user
 

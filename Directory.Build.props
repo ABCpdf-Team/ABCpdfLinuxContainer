@@ -1,0 +1,20 @@
+<Project>
+
+  <!-- Shared across ABCpdfLinuxContainer and ABCpdfLinuxContainer.Tests so they can't drift apart. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ABCpdf" Version="14.0.5" />
+    <!-- This isn't needed by the test project but we want one place to bump ABCpdf versions -->
+    <PackageReference Include="ABCpdf.ABCChrome146.Linux" Version="14.0.5" />
+  </ItemGroup>
+
+  <!-- This and the PackageReferences above are the only two edits a 
+       future ABCpdf major-version bump needs across the whole solution. -->
+  <ItemGroup>
+    <Using Include="WebSupergoo.ABCpdf14" />
+  </ItemGroup>
+
+</Project>

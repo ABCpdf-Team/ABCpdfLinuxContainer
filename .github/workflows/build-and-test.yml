@@ -1,0 +1,39 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj
+
+      - name: Build
+        run: dotnet build ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj -c Release --no-restore
+
+      # ABCpdfLinuxContainer.Tests builds and runs the real container image via Testcontainers,
+      # so this exercises the actual Dockerfile/health check/htmltopdf endpoint end-to-end.
+      # Note: dotnet test buffers captured stdout per test and only surfaces it on failure or in
+      # the final summary, so Testcontainers' progress (and our own ConsoleLogger, see
+      # HtmlToPdfEndpointTests.cs) won't stream live here - but it will be dumped in full if a test
+      # actually fails, and the reduced wait-strategy timeout means a broken run fails fast rather
+      # than silently retrying for up to the default 1 hour.
+      - name: Test
+        env:
+          ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
+        run: dotnet test ABCpdfLinuxContainer.Tests/ABCpdfLinuxContainer.Tests.csproj

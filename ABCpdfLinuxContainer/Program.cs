@@ -1,17 +1,21 @@
-using WebSupergoo.ABCpdf14;
+using ABCpdfLinuxContainer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Set the license from dotnet secrets
-var abcPdfLicense = builder.Configuration["ABCpdf:LicenseKey"] ?? 
-	throw new InvalidOperationException("ABCpdf license key is not configured. Please configure the 'ABCpdf:LicenseKey' secret or environment variable.");
-
-if (!XSettings.InstallLicense(abcPdfLicense))
-    throw new InvalidOperationException("ABCpdf license failed installation. Please verify that the configured license key is valid.");
+#if DEBUG
+// Local testing only: a git-ignored .secrets file (see .secrets.example) at the repo root - one
+// level above the project's content root - can supply the key when the environment variable isn't set.
+var repoRoot = Directory.GetParent(builder.Environment.ContentRootPath)?.FullName ?? builder.Environment.ContentRootPath;
+ABCpdfLicenseInstaller.Install("ABCPDF_LICENSE_KEY", Path.Combine(repoRoot, ".secrets"));
+#else
+ABCpdfLicenseInstaller.Install("ABCPDF_LICENSE_KEY");
+#endif
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -20,6 +24,8 @@ if(app.Environment.IsDevelopment()) {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
+app.MapHealthChecks("/health");
 
 app.MapGet("/htmltopdf", (string htmlOrUrl) => {
 	using Doc doc = new();

@@ -1,0 +1,81 @@
+name: Bump .NET / ABCpdf Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      dotnet_version:
+        description: "New .NET version (e.g. 10.0 or 11.0)"
+        required: true
+        type: string
+        default: "10.0"
+      abcpdf_version:
+        description: "New ABCpdf NuGet package version (e.g. 14.0.6 or 15.0.0)"
+        required: true
+        type: string
+        default: "14.0.5"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      # A PAT (not the default GITHUB_TOKEN) is required here: PRs opened with GITHUB_TOKEN do not
+      # trigger other workflows' `pull_request` events, so "Build and Test" would never run on it.
+      # Add a repo secret named REPO_PAT (classic PAT with `repo` scope, or fine-grained
+      # Contents: read/write + Pull requests: read/write) for this workflow to work.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_PAT }}
+
+      - name: Update .NET target framework and SDK image
+        run: |
+          sed -i -E 's/(<TargetFramework>net)[0-9]+\.[0-9]+(<\/TargetFramework>)/\1${{ inputs.dotnet_version }}\2/' Directory.Build.props
+          sed -i -E "s#(mcr\.microsoft\.com/dotnet/sdk:)[0-9]+\.[0-9]+#\1${{ inputs.dotnet_version }}#" ABCpdfLinuxContainer/Dockerfile
+
+      - name: Update ABCpdf package versions
+        run: |
+          sed -i -E 's/(Include="ABCpdf(\.ABCChrome146\.Linux)?" Version=")[^"]+(")/\1${{ inputs.abcpdf_version }}\3/' Directory.Build.props
+
+      - name: Update ABCpdf Docker base image tag
+        run: |
+          major="$(cut -d. -f1 <<< '${{ inputs.abcpdf_version }}')"
+          sed -i -E "s#(FROM abcpdf/abcpdf:)[0-9]+#\1${major}#" ABCpdfLinuxContainer/Dockerfile
+
+      - name: Fail if nothing changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes were made - check the version inputs against the current versions." >&2
+            exit 1
+          fi
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ secrets.REPO_PAT }}
+        run: |
+          branch="bump/dotnet-${{ inputs.dotnet_version }}-abcpdf-${{ inputs.abcpdf_version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -am "Bump .NET to ${{ inputs.dotnet_version }} and ABCpdf to ${{ inputs.abcpdf_version }}"
+          git push origin "$branch"
+          gh pr create \
+            --title "Bump .NET to ${{ inputs.dotnet_version }} and ABCpdf to ${{ inputs.abcpdf_version }}" \
+            --body "Automated version bump via the **Bump .NET / ABCpdf Version** workflow.
+
+          Updates:
+          - \`TargetFramework\` (shared via \`Directory.Build.props\`) and the \`mcr.microsoft.com/dotnet/sdk\` Dockerfile base image tag
+          - \`ABCpdf\` and \`ABCpdf.ABCChrome146.Linux\` package versions, and the \`abcpdf/abcpdf\` Dockerfile base image tag
+
+          The two ABCpdf-related changes are bumped together deliberately: Dependabot proposes ABCpdf NuGet minor/patch updates and Docker base image updates (including major) independently, but a major ABCpdf bump needs its NuGet package version and Docker image tag to move together - merging one without the other leaves the container running mismatched native/managed ABCpdf versions. Leave \`abcpdf_version\` at its current value to bump only .NET, or vice versa.
+
+          Not touched, and worth checking on a major version bump specifically:
+          - the \`WebSupergoo.ABCpdf14\` global using in \`Directory.Build.props\` - the namespace itself is version-baked and may need to become e.g. \`WebSupergoo.ABCpdf15\`
+          - the \`ABCChrome146\` folder/path references in the Dockerfile, since that number tracks the bundled Chrome build and isn't derivable from the ABCpdf version alone
+
+          Check ABCpdf's own release notes for both before merging." \
+            --base master \
+            --head "$branch"
