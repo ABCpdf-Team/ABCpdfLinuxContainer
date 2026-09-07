@@ -28,6 +28,11 @@ jobs:
 
       # ABCpdfLinuxContainer.Tests builds and runs the real container image via Testcontainers,
       # so this exercises the actual Dockerfile/health check/htmltopdf endpoint end-to-end.
+      # Note: dotnet test buffers captured stdout per test and only surfaces it on failure or in
+      # the final summary, so Testcontainers' progress (and our own ConsoleLogger, see
+      # HtmlToPdfEndpointTests.cs) won't stream live here - but it will be dumped in full if a test
+      # actually fails, and the reduced wait-strategy timeout means a broken run fails fast rather
+      # than silently retrying for up to the default 1 hour.
       - name: Test
         env:
           ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
