@@ -21,6 +21,6 @@ public static class ABCpdfLicenseInstaller
 		if (!XSettings.InstallLicense(key, throwOnFailure: false))
 			throw new InvalidOperationException("ABCpdf license is invalid. Please verify the configured license key.");
 
-		Console.WriteLine($"ABCpdf license installed: {XSettings.LicenseDescription} (licensed to {XSettings.Licensee})");
+		Console.WriteLine($"ABCpdf license installed: {XSettings.LicenseDescription}");
 	}
 }
