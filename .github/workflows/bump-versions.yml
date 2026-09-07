@@ -27,7 +27,7 @@ jobs:
       # Add a repo secret named REPO_PAT (classic PAT with `repo` scope, or fine-grained
       # Contents: read/write + Pull requests: read/write) for this workflow to work.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.REPO_PAT }}
 
