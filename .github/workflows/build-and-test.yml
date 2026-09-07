@@ -5,15 +5,57 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  # GitHub withholds all repo secrets (other than the default GITHUB_TOKEN) from `pull_request`
+  # runs triggered by dependabot[bot], to stop a compromised dependency's build/test scripts from
+  # exfiltrating them. pull_request_target runs with the base branch's secrets available instead,
+  # but does NOT check out the PR's changes by default - the dependabot-only job below explicitly
+  # checks out the PR head commit for exactly that reason. It's scoped to dependabot[bot] alone so
+  # this elevated access never applies to a PR from anyone else.
+  pull_request_target:
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
   build-and-test:
+    if: github.event_name != 'pull_request_target' && !(github.event_name == 'pull_request' && github.actor == 'dependabot[bot]')
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj
+
+      - name: Build
+        run: dotnet build ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj -c Release --no-restore
+
+      # ABCpdfLinuxContainer.Tests builds and runs the real container image via Testcontainers,
+      # so this exercises the actual Dockerfile/health check/htmltopdf endpoint end-to-end.
+      # Note: dotnet test buffers captured stdout per test and only surfaces it on failure or in
+      # the final summary, so Testcontainers' progress (and our own ConsoleLogger, see
+      # HtmlToPdfEndpointTests.cs) won't stream live here - but it will be dumped in full if a test
+      # actually fails, and the reduced wait-strategy timeout means a broken run fails fast rather
+      # than silently retrying for up to the default 1 hour.
+      - name: Test
+        env:
+          ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}
+        run: dotnet test ABCpdfLinuxContainer.Tests/ABCpdfLinuxContainer.Tests.csproj
+
+  build-and-test-dependabot:
+    if: github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -26,8 +68,6 @@ jobs:
       - name: Build
         run: dotnet build ABCpdfLinuxContainer/ABCpdfLinuxContainer.csproj -c Release --no-restore
 
-      # ABCpdfLinuxContainer.Tests builds and runs the real container image via Testcontainers,
-      # so this exercises the actual Dockerfile/health check/htmltopdf endpoint end-to-end.
       - name: Test
         env:
           ABCPDF_LICENSE_KEY: ${{ secrets.ABCPDF_LICENSE_KEY }}

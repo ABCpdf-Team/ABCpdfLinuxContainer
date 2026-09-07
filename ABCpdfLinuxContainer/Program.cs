@@ -1,17 +1,15 @@
 using ABCpdfLinuxContainer;
-using WebSupergoo.ABCpdf14;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #if DEBUG
-// .secrets (see .secrets.example) lives at the repo root, one level above the project's content root.
+// Local testing only: a git-ignored .secrets file (see .secrets.example) at the repo root - one
+// level above the project's content root - can supply the key when the environment variable isn't set.
 var repoRoot = Directory.GetParent(builder.Environment.ContentRootPath)?.FullName ?? builder.Environment.ContentRootPath;
-var secretsFilePath = Path.Combine(repoRoot, ".secrets");
+ABCpdfLicenseInstaller.Install("ABCPDF_LICENSE_KEY", Path.Combine(repoRoot, ".secrets"));
 #else
-string? secretsFilePath = null;
+ABCpdfLicenseInstaller.Install("ABCPDF_LICENSE_KEY");
 #endif
-
-ABCpdfLicenseInstaller.InstallAndValidate(Environment.GetEnvironmentVariable, secretsFilePath, File.Exists, File.ReadAllLines);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

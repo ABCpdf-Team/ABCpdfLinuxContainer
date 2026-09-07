@@ -1,0 +1,43 @@
+name: Auto-Approve and Merge Automated PRs
+
+on:
+  workflow_run:
+    workflows: ["Build and Test"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-approve:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      (
+        (github.event.workflow_run.event == 'pull_request_target' && github.event.workflow_run.actor.login == 'dependabot[bot]') ||
+        (github.event.workflow_run.event == 'pull_request' && startsWith(github.event.workflow_run.head_branch, 'bump/'))
+      )
+    runs-on: ubuntu-latest
+    steps:
+      # Uses the default GITHUB_TOKEN (github-actions[bot]) rather than REPO_PAT deliberately:
+      # a "bump/*" PR is opened as whichever account owns REPO_PAT, and GitHub refuses to let an
+      # account approve its own pull request, so approval must come from a different identity.
+      - name: Approve the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review --approve \
+            --repo "${{ github.repository }}" \
+            "${{ github.event.workflow_run.pull_requests[0].number }}"
+
+      # --auto (rather than merging immediately) defers to GitHub's own handling of any other
+      # required checks/reviews configured on the branch, instead of assuming this approval and
+      # the just-completed Build and Test run are the only requirements. Requires "Allow auto-merge"
+      # to be enabled in the repo's settings, and squash to match this repo's existing merge style.
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge --auto --squash \
+            --repo "${{ github.repository }}" \
+            "${{ github.event.workflow_run.pull_requests[0].number }}"

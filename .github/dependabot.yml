@@ -1,21 +1,57 @@
 version: 2
 updates:
+  # ABCpdf* packages are capped at minor/patch here deliberately: a major bump also needs the
+  # abcpdf/abcpdf Docker base image tag below (proposed independently, since Dependabot can't
+  # couple updates across ecosystems into one PR) and the ABCChrome146 path in the Dockerfile
+  # bumped to match by hand - merging just the package update alone would leave the container
+  # running a mismatched native ABCpdf version. If the docker update below bumps abcpdf/abcpdf to
+  # a new major version, bump these packages (and the ABCChrome146 path) to match manually.
+  #
+  # cooldown holds off proposing a version until it's been published for at least that many days -
+  # a minimum-package-age gate against supply chain attacks where a compromised release gets
+  # published and pulled in before anyone notices something's wrong with it. Patches (often
+  # security fixes themselves) get a short window so we're not slow to receive those; majors get
+  # the longest, since they're higher-impact and rarely urgent.
   - package-ecosystem: "nuget"
     directory: "/ABCpdfLinuxContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ABCpdf*"
+        update-types: ["version-update:semver-major"]
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
 
   - package-ecosystem: "nuget"
     directory: "/ABCpdfLinuxContainer.Tests"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ABCpdf*"
+        update-types: ["version-update:semver-major"]
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
+      semver-minor-days: 7
+      semver-patch-days: 3
 
+  # Left unrestricted, including major bumps - see the note above the nuget entries.
+  # semver-*-days isn't supported for this ecosystem (tags aren't guaranteed to be semver), so
+  # only default-days applies here.
   - package-ecosystem: "docker"
     directory: "/ABCpdfLinuxContainer"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
+  # semver-*-days isn't supported for this ecosystem either - see the docker entry above.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
