@@ -63,11 +63,11 @@ To actually view the generated PDF copy the link in the "Request URL" and paste 
 http://localhost:5521/htmltopdf?htmlOrUrl=%3Cb%3EHello%3C%2Fb%3E%20%3Cem%3Eworld%3C%2Fem%3E
 ```
 This should load up a PDF in the browser as follows:
-!["PDF Test OUtput"](.img/PDFoutput.png)
+!["PDF Test Output"](.img/PDFoutput.png)
 
 ### Language Support
 
-The abcpdf Docker image used have support for a number of language character sets. You may test this with the application using the following Ukrainian, Arabic and Hebrew language examples:
+The ABCpdf Docker image used have support for a number of language character sets. You may test this with the application using the following Ukrainian, Arabic and Hebrew language examples:
 
 ```html
 <p><strong>Привіт</strong> <em>Світ</em></p>
@@ -133,4 +133,4 @@ The Dockerfile we use in this project makes use of the 'app' USER as specified i
 
 ## Further Reading
 
-You should refer to [ABCpdf Dockerfile GitHub repoistory](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/) for the latest docker-specific information.
+You should refer to [ABCpdf Dockerfile GitHub repository](https://github.com/ABCpdf-Team/ABCpdf-Dockerfiles/) for the latest docker-specific information.
