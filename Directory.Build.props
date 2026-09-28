@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ABCpdf" Version="14.0.5" />
+    <PackageReference Include="ABCpdf" Version="14.0.6" />
     <!-- This isn't needed by the test project but we want one place to bump ABCpdf versions -->
-    <PackageReference Include="ABCpdf.ABCChrome146.Linux" Version="14.0.5" />
+    <PackageReference Include="ABCpdf.ABCChrome146.Linux" Version="14.0.6" />
   </ItemGroup>
 
   <!-- This and the PackageReferences above are the only two edits a 
